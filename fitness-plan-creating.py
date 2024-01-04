@@ -149,12 +149,13 @@ def get_calculated_info():
     driver.find_element(By.CLASS_NAME, 'btn-danger').click()
     time.sleep(2)
 
-    # Atrodam atbilstošu tabulu, tad atrodam tajā visas rindas, paņemam tikai 2. rindu un no 2 - 4 šūnas iegustam barības vielu daudzumu dienā
+    # Atrodam atbilstošu tabulu, tad atrodam tajā visas rindas, paņemam tikai 2. (ar indeksu 1) rindu un no 2 - 4 šūnas iegustam barības vielu daudzumu dienā
     rows = driver.find_elements(By.XPATH, "//table[@id='tableContent']/tbody/tr")
     row_for_per_day = rows[1]
     needed_cells = row_for_per_day.find_elements(By.XPATH, './td[position() > 1 and position() < 5]')
     nutrients_per_day = [float(nutrients.text) for nutrients in needed_cells]
 
+    # Kopējam informāciju no garas tabulas, kur ir pierakstīti kaloriju daudzumi katrā nedēļā
     rows = driver.find_elements(By.XPATH, "//table[@id='weight-gain-table']/tbody/tr")
     calories_data = []
     week_number = []
