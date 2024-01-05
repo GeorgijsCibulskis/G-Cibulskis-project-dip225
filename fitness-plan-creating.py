@@ -152,6 +152,7 @@ def get_calculated_info():
     # Atrodam atbilstošu tabulu, tad atrodam tajā visas rindas, paņemam tikai 2. (ar indeksu 1) rindu un no 2 - 4 šūnas iegustam barības vielu daudzumu dienā
     rows = driver.find_elements(By.XPATH, "//table[@id='tableContent']/tbody/tr")
     row_for_per_day = rows[1]
+    # Šeit tiek paņemta 2., 3. un 4. pozīcija no tabulas 2 rindas, kuras atbilst par Carbs, Protein un Fat vērtībām dienā
     needed_cells = row_for_per_day.find_elements(By.XPATH, './td[position() > 1 and position() < 5]')
     nutrients_per_day = [float(nutrients.text) for nutrients in needed_cells]
 
