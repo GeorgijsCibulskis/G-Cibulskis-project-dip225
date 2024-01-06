@@ -1,24 +1,23 @@
-from openpyxl import Workbook
+from openpyxl import load_workbook
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
+from fitness_plan_creating import merge_and_center
 import time
 
 service = Service()
 option = webdriver.ChromeOptions()
 driver = webdriver.Chrome(service=service, options=option)
 
-driver.get("https://www.nutritionvalue.org")
-time.sleep(2)
-driver.find_element(By.CSS_SELECTOR, 'input[value="Accept"]').click()
-time.sleep(1)
-
 def search_for_product():
+    driver.get("https://www.nutritionvalue.org")
+    time.sleep(2)
+    driver.find_element(By.CSS_SELECTOR, 'input[value="Accept"]').click()
+    time.sleep(1)
     # Lietotājs ievada kādu productu un tad programma to ievada meklēšana laukā
     while True:
         product_name = input("Please enter product's name: ")
@@ -70,15 +69,44 @@ def choice_list():
             carbs_full_text = driver.find_element(By.XPATH, "//table[@class='center zero']/tbody/tr[18]").text
             carbs = (carbs_full_text.split(" "))[2][:-1]
             carbs = float(carbs)
-            # Ar olbaltumvielām viss ir ļoti sarežģīti, jo dažiem produktiem to rinda tabulā mainās un šūnai ir klase 'left', kura ir arī visām pārējam šūnām, tāpēc pēc klases mēklēt nevar
-            # Tad izlēmu mēklēt peč <b> elementa, kurā ir rakstīt 'Protein', taču no tā es nevaru dabūt olbaltumvielu daudzumu ar metodi .text, jo tā atgriež tekstu no <b> elementa, kas ir
+            # Ar olbaltumvielām viss ir ļoti sarežģīti, jo dažiem produktiem to rinda tabulā mainās un šūnai ir klase 'left', kura ir arī visām pārējam šūnām, tāpēc pēc klases mēklēt nevar.
+            # Tad izlēmu mēklēt peč <b> elementa, kurā ir rakstīts 'Protein', taču no tā es nevaru dabūt olbaltumvielu daudzumu ar metodi .text, jo tā atgriež tekstu no <b> elementa, kas ir
             # 'Protein', tāpēc mēklēju to <b> elementu, tad no to meklēju vecāka šūnu (parent td element) un tad jau no tās šūna (td) ieguvu tekstu ar olbaltumvielu daudzumu
             protein_b_element = driver.find_element(By.XPATH, "//b[text()='Protein']")
             protein_parent_td_element = protein_b_element.find_element(By.XPATH, "./parent::td")
             protein = protein_parent_td_element.text.split(" ")[1][:-1]
             protein = float(protein)
-            print(calories, carbs, protein, fat)
+            return[calories, carbs, protein, fat]
 
-search_for_product()
-choice_list()
-driver.close()
+# Funkcijas, kuras ir ērti izmantot, kad vajag ierakstīt excelī kaut ko rindā vai kolonnā, nevis lietot sheet.append, kas ieraksta nākamajā tukšā rindā, kas ne vienmēr ir vajadzīgs
+def excel_column_append(sheet, start_row, start_column, appending_list):
+    for index, value in enumerate(appending_list):
+        sheet.cell(row = start_row + index, column = start_column, value = value)
+
+def excel_raw_append(sheet, start_row, start_column, appending_list):
+    for index, value in enumerate(appending_list):
+        sheet.cell(row = start_row, column = start_column + index, value = value)
+
+# Funkcija, kura taisa smūko tabulu katrai nedēļai, kurā tiks attēloti katras dienas apēstas barības vielas un kalorijas
+def expanding_excel():
+    name = input("Please enter your name and surname: ")
+    name = name.split(" ")
+    name[0] = name[0][0]
+    name = name[::-1]
+    name = "_".join(name)
+    filename = f'{name}_nutrition.xlsx'
+    workbook = load_workbook(filename=filename)
+    sheet = workbook.active
+
+    day_numbers = [1, 2, 3, 4, 5, 6, 7]
+    nutrients = ['Carbs', 'Protein', 'Fat', 'Calories']
+    merge_and_center(sheet, f"Week {sheet['G16'].value}", sheet['F16'].value, sheet['F16'].value, 2, 8)
+    excel_raw_append(sheet, sheet['F16'].value + 1, 2, day_numbers)
+    excel_column_append(sheet, sheet['F16'].value + 2, sheet['D16'].value, nutrients)
+    # sheet['D16'] = sheet['D16'].value + 1 Do not needed now, since not completed whole algorithm
+    workbook.save(filename)
+
+expanding_excel()
+# search_for_product()
+# product_calories = choice_list()
+# driver.close()

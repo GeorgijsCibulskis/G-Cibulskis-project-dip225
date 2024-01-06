@@ -8,20 +8,19 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import time
 
-service = Service()
-option = webdriver.ChromeOptions()
-driver = webdriver.Chrome(service=service, options=option)
-time.sleep(1)
-# Atvert vietni
-driver.get("https://www.prokerala.com/health/health-calculators/weight-gain-calculator.php")
-time.sleep(3)
+def start_driver():
+    service = Service()
+    option = webdriver.ChromeOptions()
+    driver = webdriver.Chrome(service=service, options=option)
+    time.sleep(1)
+    return driver
 
-# Uzspiežam uz pogas "consent", lai piekristu cookie un personīgo datu apstrādei
-consent_button = driver.find_element(By.CLASS_NAME, 'fc-cta-consent')
-consent_button.click()
+def consent(driver):
+    consent_button = driver.find_element(By.CLASS_NAME, 'fc-cta-consent')
+    consent_button.click()
 
 # Funkcija, kura izvēlas lietotāja dzimumu un pārbauda uzreiz ievades kļūdas
-def select_gender():
+def select_gender(driver):
     while True:
         gender = input("Are you male or female? ")
         if gender.lower() == 'male':
@@ -37,7 +36,7 @@ def select_gender():
     return gender
 
 # Funkcija, kura izvēlas ēdienreižu skaitu un pārbauda, vai tas tika pareizi ievādīts
-def select_meal_count():
+def select_meal_count(driver):
     while True:
         meal_count = input("Enter how many times do you eat during the day (3-6): ")
         if (meal_count.isnumeric() == False) or int(meal_count) < 3 or int(meal_count) > 6:
@@ -91,9 +90,9 @@ def validate_exercise_mode(exercise_mode):
     return True
 
 
-def get_info():
+def get_info(driver):
     # Informāciajs ievāde ar pārbaudēm
-    gender = select_gender()
+    gender = select_gender(driver)
 
 
     age = input("Enter your age: ")
@@ -125,7 +124,7 @@ def get_info():
     while not validate_exercise_mode(exercise_mode):
         exercise_mode = input("Enter your exercise mode: ")
 
-    meal_count = select_meal_count()
+    meal_count = select_meal_count(driver)
 
     # Meklējām atbilsotšus logus, kur ierakstīt nepieciešamu informāciju par lietotāju 
     driver.find_element(By.ID, 'fin_age').send_keys(age)
@@ -145,7 +144,7 @@ def get_info():
     # Atgriežam ivādīto informāciju tālākām darbībām
     return [gender.capitalize(), age, height, weight, goal_weight, time_span, exercise_mode, meal_count]
 
-def get_calculated_info():
+def get_calculated_info(driver):
     driver.find_element(By.CLASS_NAME, 'btn-danger').click()
     time.sleep(2)
 
@@ -187,9 +186,9 @@ def merge_and_center(sheet, section_name, start_row, end_row, start_col, end_col
     # Šeit funkcija merge_cells, apvieno vairākas šūnas, balstoties uz uzdotām 'kooridātēm'
     sheet.merge_cells(start_row=merged_cell.row, start_column=merged_cell.column, end_row=end_row, end_column=end_col)
 
-# Funkcija paņem pēdējo rindu darba lapā un no tās katru aizpidlītu šūnu, tad to centrē
-def center_whole_row(sheet):
-    for cell in sheet[sheet.max_row]:
+# Funkcija paņem rindu darba lapā un no tās katru aizpidlītu šūnu, tad to centrē
+def center_whole_row(sheet, row):
+    for cell in sheet[row]:
         cell.alignment = Alignment(horizontal='center')
 
 
@@ -205,9 +204,9 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     sheet.merge_cells(start_row = 1, start_column = 1, end_row = 1, end_column = 2)
     sheet.append(['']) 
     sheet.append(user_info_labels)
-    center_whole_row(sheet)
+    center_whole_row(sheet, sheet.max_row)
     sheet.append(user_info)
-    center_whole_row(sheet)
+    center_whole_row(sheet, sheet.max_row)
     correct_width(sheet, user_info_labels, user_info)
     sheet.append([''])
 
@@ -216,9 +215,9 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     # Uztaisa apvienotu šūnu vienā rindā un tik garu, cik garš ir barības vielu saraksts
     merge_and_center(sheet, 'Nutrients per day', sheet.max_row + 1, sheet.max_row + 1, 1, len(nutrients_labels))
     sheet.append(nutrients_labels)
-    center_whole_row(sheet)
+    center_whole_row(sheet, sheet.max_row)
     sheet.append(nutrients_per_day)
-    center_whole_row(sheet)
+    center_whole_row(sheet, sheet.max_row)
     correct_width(sheet, nutrients_labels, nutrients_per_day)
     sheet.append(['']) 
     
@@ -226,9 +225,9 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     nutrients_labels = ['Carbs per Meal', 'Protein per Meal', 'Fat per Meal']
     merge_and_center(sheet, 'Nutrients per meal', sheet.max_row + 1, sheet.max_row + 1, 1, len(nutrients_labels))
     sheet.append(nutrients_labels)
-    center_whole_row(sheet)
+    center_whole_row(sheet, sheet.max_row)
     sheet.append(nutrients_per_meal)
-    center_whole_row(sheet)
+    center_whole_row(sheet, sheet.max_row)
     correct_width(sheet, nutrients_labels, nutrients_per_meal)
     sheet.append([''])
     sheet.append([''])
@@ -236,10 +235,26 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     # Kaloriju daudzums katrā nedēļa (gan dienas, gan katras ēdienreizes 'deva')
     sheet.append(['Week Number', 'Calories per Day', 'Calories per Meal'])
     sheet.column_dimensions['C'].width = len('Calories per Meal') + 2
-    center_whole_row(sheet)
+    center_whole_row(sheet, sheet.max_row)
     for week, calories_day, calories_meal in zip(week_data, calories_per_day, calories_per_meal):
         sheet.append([week, calories_day, calories_meal])
-        center_whole_row(sheet)
+        center_whole_row(sheet, sheet.max_row)
+
+    # Šie cipari būs vajadzīgi tālāk programma, lai kontrolētu kurā vietā excelī veikt izmaiņas
+    sheet['D15'] = 'Control Column'
+    sheet['E15'] = 'Control Day'
+    sheet['F15'] = 'Control Raw'
+    sheet['G15'] = 'Control Week'
+    sheet['H15'] = 'Control Meal'
+    sheet['D16'] = 1
+    sheet['E16'] = 1
+    sheet['F16'] = 44
+    sheet['G16'] = 1
+    sheet['H16'] = 1
+
+    sheet.column_dimensions['D'].width = len('Control Column') + 2
+    center_whole_row(sheet, 15)
+    center_whole_row(sheet, 16)
 
     current_date = datetime.now().date()
     sheet_name = f"Start - {current_date} ({user_info[5]})"
@@ -249,19 +264,27 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     name[0] = name[0][0]
     name = name[::-1]
     name = "_".join(name)
-    workbook.save(f"{name}_nutrition_{current_date}.xlsx")
+    workbook.save(f"{name}_nutrition.xlsx")
 
-info_about_user = get_info()
-time.sleep(2)
+# Galvenā funkcija, kura palaiž visu failu TIKAI, ja pats fails tika izsaukts, nevis importēts kādā citā failā
+def main():
+    driver = start_driver()
+    driver.get("https://www.prokerala.com/health/health-calculators/weight-gain-calculator.php")
+    time.sleep(3)
 
-calculated_info = get_calculated_info()
-nutrients_per_day = calculated_info[0]
-calories_per_day = calculated_info[1]
-calories_per_meal = [calories/int(info_about_user[7]) for calories in calories_per_day]
-week_data = calculated_info[2]
-nutrients_per_meal = [nutrient/int(info_about_user[7]) for nutrient in nutrients_per_day]
+    consent(driver)
+    info_about_user = get_info(driver)
+    time.sleep(2)
+    calculated_info = get_calculated_info(driver)
+    nutrients_per_day = calculated_info[0]
+    calories_per_day = calculated_info[1]
+    calories_per_meal = [calories/int(info_about_user[7]) for calories in calories_per_day]
+    week_data = calculated_info[2]
+    nutrients_per_meal = [nutrient/int(info_about_user[7]) for nutrient in nutrients_per_day]
 
+    write_to_excel(info_about_user, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal)
 
-write_to_excel(info_about_user, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal)
+    driver.close()
 
-driver.close
+if __name__ == "__main__":
+    main()
