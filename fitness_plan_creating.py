@@ -243,7 +243,7 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     # Šie cipari būs vajadzīgi tālāk programma, lai kontrolētu kurā vietā excelī veikt izmaiņas
     sheet['D15'] = 'Control Column'
     sheet['E15'] = 'Control Day'
-    sheet['F15'] = 'Control Raw'
+    sheet['F15'] = 'Control Row'
     sheet['G15'] = 'Control Week'
     sheet['H15'] = 'Control Meal'
     sheet['D16'] = 1
