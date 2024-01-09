@@ -75,7 +75,7 @@ def excel_row_append(sheet, start_row, start_column, appending_list):
         sheet.cell(row = start_row, column = start_column + index, value = value)
 
 # Funkcija, kura taisa smūko tabulu katrai nedēļai, kurā tiks attēloti katras dienas apēstas barības vielas un kalorijas
-def expanding_excel(workbook, sheet, filename):
+def expanding_week_excel(workbook, sheet, filename):
 
     day_numbers = [1, 2, 3, 4, 5, 6, 7]
     nutrients = ['Carbs', 'Protein', 'Fat', 'Calories']
@@ -85,7 +85,7 @@ def expanding_excel(workbook, sheet, filename):
     # sheet['D16'] = sheet['D16'].value + 1 Do not needed now, since not completed whole algorithm
     workbook.save(filename)
 
-def choice_list(workbook, sheet, filename, driver):
+def choice_and_appending_nutrition(workbook, sheet, filename, driver):
     # Šajā vietā ērti lietot CSS_SELECTOR XPATH vietā, jo katrai šūnai ir klase 'left'
     # Tātad programma atrod visas tabulas rindas un nokopē no tiem tekstu, kas principā ir garš saraksts ar ēdienu nosaukumiem, kuri tika atrasti pēc lietotāja ievādīta vārda
     cells = driver.find_elements(By.CSS_SELECTOR, "td.left")
@@ -150,8 +150,8 @@ def main():
     consent(driver)
 
     search_for_product(driver)
-    choice_list(workbook, sheet, filename, driver)
-    # expanding_excel(workbook, sheet, filename)
+    choice_and_appending_nutrition(workbook, sheet, filename, driver)
+    # expanding_week_excel(workbook, sheet, filename)
     # search_for_product()
     # product_calories = choice_list()
     # driver.close()

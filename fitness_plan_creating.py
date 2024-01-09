@@ -4,14 +4,16 @@ from openpyxl.utils import get_column_letter
 from openpyxl.styles import Alignment
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 import time
 
 def start_driver():
     service = Service()
-    option = webdriver.ChromeOptions()
-    driver = webdriver.Chrome(service=service, options=option)
+    options = Options()
+    options.add_argument('--headless')
+    driver = webdriver.Chrome(service=service, options=options)
     time.sleep(1)
     return driver
 
@@ -179,7 +181,7 @@ def correct_width(sheet, first_row, second_row):
         sheet.column_dimensions[col_letter].width = max_length + 2
 
 def merge_and_center(sheet, section_name, start_row, end_row, start_col, end_col):
-    # Šī funkcija ir domāta, lai apvienotu viarākas šūnas kopā un centrēt tekstu tajā (principā merge and center poga pašā Excel, bet automatizētā un smūkāk izskatās :) )
+    # Šī funkcija ir domāta, lai apvienotu vairākas šūnas kopā un centrēt tekstu tajā (principā merge and center poga pašā Excel, bet automatizētā un smūkāk izskatās :) )
     merged_cell = sheet.cell(row=start_row, column=start_col, value=section_name)
     # Alignment klase ir daļa no openpyxl styles, kas ļauj modificēt šūnas saturu (fonts, izvietojums utt.)
     merged_cell.alignment = Alignment(horizontal='center')
@@ -191,7 +193,7 @@ def center_whole_row(sheet, row):
     for cell in sheet[row]:
         cell.alignment = Alignment(horizontal='center')
 
-
+# funkcija, kura pieraksta vius iegūto informāciju excelī
 def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal):
     workbook = Workbook()
     sheet = workbook.active
