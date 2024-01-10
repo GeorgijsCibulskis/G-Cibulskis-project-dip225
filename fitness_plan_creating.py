@@ -52,82 +52,7 @@ def select_meal_count(driver):
             break
     return meal_count
 
-# Funkcijas, lai paŗbaudītu pareizu lietotāja ievādi
-def validate_age(age):
-    if (age.isnumeric() == False) or int(age) < 0 or int(age) > 110:
-        print("Invalid age. Please enter a valid age.")
-        return False
-    return True
-
-def validate_weight(weight):
-    if (weight.isnumeric() == False) or int(weight) < 30 or int(weight) > 360:
-        print("Invalid weight. Please enter a valid weight.")
-        return False
-    return True
-
-def validate_goal_weight(goal_weight, weight):
-    if (goal_weight.isnumeric() == False) or int(goal_weight) < int(weight) or int(weight) > 360:
-        print("Invalid weight. Please enter a greater number.")
-        return False
-    return True
-
-def validate_height(height):
-    if (height.isnumeric() == False) or int(height) < 20 or int(height) > 300:
-        print("Invalid height. Please enter a valid height.")
-        return False
-    return True
-
-def validate_time_span(time_span):
-    valid_time = ['1 week', '2 weeks', '3 weeks', '1 month', '2 months', '3 months', '4 months', '5 months', '6 months', '1 year']
-    if time_span not in valid_time:
-        print("Invalid time span. Please choose a valid activity level.")
-        return False
-    return True
-
-def validate_exercise_mode(exercise_mode):
-    valid_levels = ['Sedentary', 'Light', 'Moderate', 'Very active', 'Extreme']
-    if exercise_mode not in valid_levels:
-        print("Invalid activity level. Please choose a valid activity level.")
-        return False
-    return True
-
-
-def get_info(driver):
-    # Informāciajs ievāde ar pārbaudēm
-    gender = select_gender(driver)
-
-
-    age = input("Enter your age: ")
-    while not validate_age(age):
-        age = input("Enter your age: ")
-    
-
-    height = input("Enter your height (in cm): ")
-    while not validate_height(height):
-        height = input("Enter your age: ")
-    
-
-    weight = input("Enter your weight (in kg): ")
-    while not validate_weight(weight):
-        weight = input("Enter your age: ")
-    
-
-    goal_weight = input("Enter your goal weight (in kg): ")
-    while not validate_goal_weight(goal_weight, weight):
-        goal_weight = input("Enter your goal_weight: ")
-
-
-    time_span = input("Enter time span, during which you wnat to achieve your goal (Available: 1 week, 2 weeks, 3 weeks, 1-6 months, 1 year): ")
-    while not validate_time_span(time_span):
-        time_span = input("Enter time span, during which you wnat to achieve your goal: ")
-
-
-    exercise_mode = input("Enter your exercise mode (Available: Sedentary, Light, Moderate, Very active, Extreme): ")
-    while not validate_exercise_mode(exercise_mode):
-        exercise_mode = input("Enter your exercise mode: ")
-
-    meal_count = select_meal_count(driver)
-
+def get_info(driver, age, weight, goal_weight, height, time_span, exercise_mode, meal_count, gender):
     # Meklējām atbilsotšus logus, kur ierakstīt nepieciešamu informāciju par lietotāju 
     driver.find_element(By.ID, 'fin_age').send_keys(age)
     driver.find_element(By.ID, 'fin_height_cm').send_keys(height)
@@ -143,7 +68,7 @@ def get_info(driver):
     exercise_dropdown = Select(driver.find_element(By.ID, 'fin_activity_modifier'))
     exercise_dropdown.select_by_visible_text(exercise_mode)
 
-    # Atgriežam ivādīto informāciju tālākām darbībām
+    # Atgriežam ievādīto informāciju tālākām darbībām
     return [gender.capitalize(), age, height, weight, goal_weight, time_span, exercise_mode, meal_count]
 
 def get_calculated_info(driver):
@@ -194,11 +119,9 @@ def center_whole_row(sheet, row):
         cell.alignment = Alignment(horizontal='center')
 
 # funkcija, kura pieraksta vius iegūto informāciju excelī
-def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal):
+def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal, name):
     workbook = Workbook()
     sheet = workbook.active
-
-    name = input("Please enter Your name and surname: ")
 
     user_info_labels = ['Gender', 'Age', 'Height', 'Weight', 'Goal Weight', 'Time Span', 'Exercise Mode', 'Meal Count']
     sheet.append([name])
@@ -269,13 +192,14 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     workbook.save(f"{name}_nutrition.xlsx")
 
 # Galvenā funkcija, kura palaiž visu failu TIKAI, ja pats fails tika izsaukts, nevis importēts kādā citā failā
-def main():
+def main(age, weight, goal_weight, height, time_span, exercise_mode, meal_count, gender, name, progressbar):
+
     driver = start_driver()
     driver.get("https://www.prokerala.com/health/health-calculators/weight-gain-calculator.php")
     time.sleep(3)
 
     consent(driver)
-    info_about_user = get_info(driver)
+    info_about_user = get_info(driver, age, weight, goal_weight, height, time_span, exercise_mode, meal_count, gender)
     time.sleep(2)
     calculated_info = get_calculated_info(driver)
     nutrients_per_day = calculated_info[0]
@@ -284,9 +208,12 @@ def main():
     week_data = calculated_info[2]
     nutrients_per_meal = [nutrient/int(info_about_user[7]) for nutrient in nutrients_per_day]
 
-    write_to_excel(info_about_user, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal)
+    write_to_excel(info_about_user, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal, name)
 
     driver.close()
-
+    # Lai apstādinātu progressa rādītāju, kad process ir beidzies (mēģināju vairākas metodes kā to izdarīt vienā failā user_interface.py, bet visas bija pārāk sarežģītas un izmantoja vēl vienu plūsmu, tāpēc
+    # vieglāk ir vienkārši nosūtīt to uz main() kā argumentu)
+    progressbar.pack_forget()
 if __name__ == "__main__":
     main()
+
