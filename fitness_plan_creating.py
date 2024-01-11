@@ -11,10 +11,10 @@ import time
 
 def start_driver():
     service = Service()
+    # Šī ir ļoti ērta funkcija, lai katru reizi, kad programma ir palaista, neatvertos internets, bet tas strādātu fonā (lietotājs neredzēs, kā atveras tīmekļa vietne un kas tajā notiek)
     options = Options()
     options.add_argument('--headless')
     driver = webdriver.Chrome(service=service, options=options)
-    time.sleep(1)
     return driver
 
 def consent(driver):
@@ -45,6 +45,7 @@ def select_meal_count(driver):
             print("Invalid meals count. Please enter valid number.")
             continue
         else:
+
             # Tā kā tīmekļa lapa ir pārāk gara, un programma nevarēs redzēt atbilstošo pogu, mums ir nepieciešams pārvietot lapu uz leju līdz tam brīdim, kad būs redzama atbilstoša poga
             meal_count_element = driver.find_element(By.CSS_SELECTOR, f'input[value="{meal_count}"]')
             driver.execute_script("arguments[0].scrollIntoView();", meal_count_element)
@@ -53,6 +54,7 @@ def select_meal_count(driver):
     return meal_count
 
 def get_info(driver, age, weight, goal_weight, height, time_span, exercise_mode, meal_count, gender):
+
     # Meklējām atbilsotšus logus, kur ierakstīt nepieciešamu informāciju par lietotāju 
     driver.find_element(By.ID, 'fin_age').send_keys(age)
     driver.find_element(By.ID, 'fin_height_cm').send_keys(height)
@@ -61,7 +63,8 @@ def get_info(driver, age, weight, goal_weight, height, time_span, exercise_mode,
 
     # Objekts, kura klase ir Select (šī kalse ir domāta tieši darbam ar tā sauktajiem dropdown elementiem tīmekļa vietnēs, kuri sastāv no viarākam izvēles variantiem)
     time_span_dropdown = Select(driver.find_element(By.ID, 'fin_goal_span'))
-    # Select klases objektam ir metode select_by_visible_text, kura izvēlas kādu variantu un visiem ispeājmiem pēc teksta, kurš ir rakstīts tajā
+
+    # Select klases objektam ir metode select_by_visible_text, kura izvēlas kādu variantu un visiem iespājmiem pēc teksta, kurš ir rakstīts tajā
     time_span_dropdown.select_by_visible_text(time_span)
 
     
@@ -78,9 +81,10 @@ def get_calculated_info(driver):
     # Atrodam atbilstošu tabulu, tad atrodam tajā visas rindas, paņemam tikai 2. (ar indeksu 1) rindu un no 2 - 4 šūnas iegustam barības vielu daudzumu dienā
     rows = driver.find_elements(By.XPATH, "//table[@id='tableContent']/tbody/tr")
     row_for_per_day = rows[1]
+
     # Šeit tiek paņemta 2., 3. un 4. pozīcija no tabulas 2 rindas, kuras atbilst par Carbs, Protein un Fat vērtībām dienā
     needed_cells = row_for_per_day.find_elements(By.XPATH, './td[position() > 1 and position() < 5]')
-    nutrients_per_day = [float(nutrients.text) for nutrients in needed_cells]
+    nutrients_per_day = [round(float(nutrients.text)) for nutrients in needed_cells]
 
     # Kopējam informāciju no garas tabulas, kur ir pierakstīti kaloriju daudzumi katrā nedēļā
     rows = driver.find_elements(By.XPATH, "//table[@id='weight-gain-table']/tbody/tr")
@@ -89,27 +93,33 @@ def get_calculated_info(driver):
     for row in rows:
         cells = row.find_elements(By.TAG_NAME, "td")
         row_data = [cell.text.strip() for cell in cells]
-        calories_data.append(float(row_data[1]))
+        calories_data.append(round(float(row_data[1])))
         week_number.append(int(row_data[0]))
 
     return [nutrients_per_day, calories_data, week_number]
 
-def correct_width(sheet, first_row, second_row):
+def correct_width(sheet, row):
     # Šeit ir cikls, kurš izmanto funkciju enumerate, kura atgriež tuple struktūras vērtības sekojošā veidā (numurs, vērtība), mūsu gadījumā numurs ir kolonnas numurs un vērtība ir
-    # 2 sarakstu (first_row un second_row) vēl viens apvienotajs tuple, kurš tika iegūts ar zip funckijas palīdzību, kura apvieno 2 sarkastus pēc principa (1. saraksta 1. vērtība, 2. sarakasta 1. vērtība) utt.
-    for col_num, (label, value) in enumerate(zip(first_row, second_row), start=1):
-        # Pārbaudam, kura vērtība no 2 ir garāka
-        max_length = max(len(str(label)), len(str(value)))
+    # kāda tipa vērtība, kura tika ierakstīta excelī
+    for col_num, value in enumerate(row, start=1):
+
+        # # Iegustam cik garš ir vērtības teksts
+        max_length = len(str(value))
+
         # Iegustam kolonnas burtu no kolonnas numura
         col_letter = get_column_letter(col_num)
-        # Izmainam atbilstošas kolonnas platumu (+2 ir lietots, lai teksts pilnībā būtu attēlots pareizē šūnā)
-        sheet.column_dimensions[col_letter].width = max_length + 2
+
+        # Izmainam atbilstošas kolonnas platumu (+3 ir lietots, lai teksts pilnībā būtu attēlots pareizē šūnā)
+        sheet.column_dimensions[col_letter].width = max_length + 3
 
 def merge_and_center(sheet, section_name, start_row, end_row, start_col, end_col):
+
     # Šī funkcija ir domāta, lai apvienotu vairākas šūnas kopā un centrēt tekstu tajā (principā merge and center poga pašā Excel, bet automatizētā un smūkāk izskatās :) )
     merged_cell = sheet.cell(row=start_row, column=start_col, value=section_name)
+
     # Alignment klase ir daļa no openpyxl styles, kas ļauj modificēt šūnas saturu (fonts, izvietojums utt.)
     merged_cell.alignment = Alignment(horizontal='center')
+
     # Šeit funkcija merge_cells, apvieno vairākas šūnas, balstoties uz uzdotām 'kooridātēm'
     sheet.merge_cells(start_row=merged_cell.row, start_column=merged_cell.column, end_row=end_row, end_column=end_col)
 
@@ -132,18 +142,19 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     center_whole_row(sheet, sheet.max_row)
     sheet.append(user_info)
     center_whole_row(sheet, sheet.max_row)
-    correct_width(sheet, user_info_labels, user_info)
+    correct_width(sheet, user_info_labels)
     sheet.append([''])
 
     # Barības vielas visas dienas garumā
     nutrients_labels = ['Carbs per Day', 'Protein per Day', 'Fat per Day']
+    
     # Uztaisa apvienotu šūnu vienā rindā un tik garu, cik garš ir barības vielu saraksts
     merge_and_center(sheet, 'Nutrients per day', sheet.max_row + 1, sheet.max_row + 1, 1, len(nutrients_labels))
     sheet.append(nutrients_labels)
     center_whole_row(sheet, sheet.max_row)
     sheet.append(nutrients_per_day)
     center_whole_row(sheet, sheet.max_row)
-    correct_width(sheet, nutrients_labels, nutrients_per_day)
+    correct_width(sheet, nutrients_labels)
     sheet.append(['']) 
     
     # Barības vielas vienā ēdienreizē
@@ -153,7 +164,7 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     center_whole_row(sheet, sheet.max_row)
     sheet.append(nutrients_per_meal)
     center_whole_row(sheet, sheet.max_row)
-    correct_width(sheet, nutrients_labels, nutrients_per_meal)
+    correct_width(sheet, nutrients_labels)
     sheet.append([''])
     sheet.append([''])
 
@@ -170,12 +181,10 @@ def write_to_excel(user_info, nutrients_per_day, nutrients_per_meal, week_data, 
     sheet['E15'] = 'Control Day'
     sheet['F15'] = 'Control Row'
     sheet['G15'] = 'Control Week'
-    sheet['H15'] = 'Control Meal'
     sheet['D16'] = 1
     sheet['E16'] = 1
-    sheet['F16'] = 44
+    sheet['F16'] = sheet.max_row + 3
     sheet['G16'] = 1
-    sheet['H16'] = 1
 
     sheet.column_dimensions['D'].width = len('Control Column') + 2
     center_whole_row(sheet, 15)
@@ -196,7 +205,7 @@ def main(age, weight, goal_weight, height, time_span, exercise_mode, meal_count,
 
     driver = start_driver()
     driver.get("https://www.prokerala.com/health/health-calculators/weight-gain-calculator.php")
-    time.sleep(3)
+    time.sleep(2)
 
     consent(driver)
     info_about_user = get_info(driver, age, weight, goal_weight, height, time_span, exercise_mode, meal_count, gender)
@@ -204,9 +213,9 @@ def main(age, weight, goal_weight, height, time_span, exercise_mode, meal_count,
     calculated_info = get_calculated_info(driver)
     nutrients_per_day = calculated_info[0]
     calories_per_day = calculated_info[1]
-    calories_per_meal = [calories/int(info_about_user[7]) for calories in calories_per_day]
+    calories_per_meal = [round(calories/int(info_about_user[7])) for calories in calories_per_day]
     week_data = calculated_info[2]
-    nutrients_per_meal = [nutrient/int(info_about_user[7]) for nutrient in nutrients_per_day]
+    nutrients_per_meal = [round(nutrient/int(info_about_user[7])) for nutrient in nutrients_per_day]
 
     write_to_excel(info_about_user, nutrients_per_day, nutrients_per_meal, week_data, calories_per_day, calories_per_meal, name)
 
@@ -214,6 +223,7 @@ def main(age, weight, goal_weight, height, time_span, exercise_mode, meal_count,
     # Lai apstādinātu progressa rādītāju, kad process ir beidzies (mēģināju vairākas metodes kā to izdarīt vienā failā user_interface.py, bet visas bija pārāk sarežģītas un izmantoja vēl vienu plūsmu, tāpēc
     # vieglāk ir vienkārši nosūtīt to uz main() kā argumentu)
     progressbar.pack_forget()
+
 if __name__ == "__main__":
     main()
 

@@ -3,10 +3,8 @@ from tkinter import messagebox
 from threading import Thread
 
 import fitness_plan_creating
-import searching_expanding
-
-
-
+import searching
+import expanding
 
 # Funkcija, kura pābauda visas ievadītas vērtības (pārnests no fitness_plan_creating.py)
 def validate_entries_for_plan_creating(age, weight, goal_weight, height):
@@ -32,6 +30,40 @@ def create_plan_if_valid(age, weight, goal_weight, height, time_span, exercise_m
     else:
         # customtkinter nav tādas funkcijas messagebox, tāpēc vajadzēja importēt parasto tkinter
         messagebox.showerror("Error", "Invalid input. Please check your entries.")
+
+# Funkcija, kura meklē ievādīto produktu un izsauc searching.py
+def searching_product(textbox, product_name, progressbar):
+    
+    # Pārbaude vai kaut kas tika ievādīts
+    if product_name == '':
+        messagebox.showerror("Error", "Please enter a product")
+        return
+    
+    # Katrā meklēšanā ir jānotīra teksta kaste
+    textbox.delete(1.0, 'end')
+    progressbar.pack(pady = 5, padx = 5)
+    progressbar.start()
+    Thread(target = searching.main, args = (textbox, product_name, progressbar)).start()
+
+# Funkcija, kura pārbauda vai tika izvēlēts pareizais produkts un izsauc expanding.py
+def expanding_excel_with_product(name, product, mass, textbox_info, end_of_day, progressbar):
+    
+    # Iegustam katru rindu no teksta kastes (no produktiem, kuri tika atrasti) 
+    products_in_textbox = textbox_info.split('\n')
+
+    # Dažkārt sarakstā var parādīties 2 tukšie elementi, tāpēc tie arī ir jāizdžēš
+    products_in_textbox = [product for product in products_in_textbox if product != '']
+    
+    # Tā kā katras rindas sākumā ir "- ", tad tie 2 elementi ir jāizņem ārā no katra elementa sarakstā
+    for i in range(len(products_in_textbox)):
+        products_in_textbox[i] = products_in_textbox[i][2:].strip()
+
+    if product.strip() in products_in_textbox:
+        progressbar.pack(pady = 5, padx = 5)
+        progressbar.start()
+        Thread(target = expanding.main, args = (name, product, mass, end_of_day, progressbar)).start()
+    else:
+        messagebox.showerror("Error", "No such product in the list")
 
 def setting_start():
     # Kā izskatīsies logs
@@ -120,11 +152,11 @@ def setting_start():
     # - ja izsauks bez lambda (command=create_plan_if_valid(/argumenti\)), tad tā funkcija izsauksies uzreiz, kad python emplimentēs šo rindu, bet ievades laukos vēl nekā nebūs => nav piemerots
     # - ja izkaukt funkciju bez iekavām kā atsauci uz funkciju (command = create_plan_if_valid), tad tajā nevarēs ierakstīt argumentus
     # tāpēc ir vajadzīga anonīma funkcija lamba, kuras 'arguments' ir īsta funkcija
-    button_create_plan = customtkinter.CTkButton(master = frame1, text = "Create Plan", command = lambda:create_plan_if_valid(many_entries[1].get(), many_entries[2].get(), many_entries[3].get(), many_entries[4].get(), time_span.get(), exercise_mode.get(), meals_per_day.get(), gender.get(), many_entries[0].get(), progressbar))
+    button_create_plan = customtkinter.CTkButton(master = frame1, text = "Create Plan", command = lambda:create_plan_if_valid(many_entries[1].get(), many_entries[2].get(), many_entries[3].get(), many_entries[4].get(), time_span.get(), exercise_mode.get(), meals_per_day.get(), gender.get(), many_entries[0].get(), progressbar1))
     button_create_plan.pack(pady = 10)
 
     # Progresa rādītājs
-    progressbar = customtkinter.CTkProgressBar(master = frame1)
+    progressbar1 = customtkinter.CTkProgressBar(master = frame1)
 
     # 2. kolonna, kura domāta, lai pievienotu barības vielas jau eksistējošam plānam
     frame2 = customtkinter.CTkFrame(master=frame_background)
@@ -132,19 +164,24 @@ def setting_start():
     frame2_label = customtkinter.CTkLabel(master = frame2, text = "Choose New Product", font = customtkinter.CTkFont(size = 28, weight = "bold"))
     frame2_label.pack(pady = 15)
 
+    product_label = customtkinter.CTkLabel(master = frame2, text = "Enter product", font = customtkinter.CTkFont(size = 16, weight = "bold"))
+    product_label.pack(pady = 5)
+
     # Ievades lauks, lai ievadītu produkta nosaukumu
     product_entry = customtkinter.CTkEntry(master = frame2, placeholder_text = "Product")
     product_entry.pack(pady = 5)
 
-    # Poga, lai atrastu produktu (izsauks failu searching&expanding.py)
-    button_find_product = customtkinter.CTkButton(master = frame2, text = "Find product")
+    # Poga, lai atrastu produktu (izsauks failu searching.py)
+    button_find_product = customtkinter.CTkButton(master = frame2, text = "Find product", command = lambda:searching_product(textbox_found_products, product_entry.get(), progressbar2))
     button_find_product.pack(pady = 5)
+
+    progressbar2 = customtkinter.CTkProgressBar(master = frame2)
 
     label_found_products = customtkinter.CTkLabel(master = frame2, text = "List of found products", font = customtkinter.CTkFont(size = 16, weight="bold"))
     label_found_products.pack(pady = 5)
 
     # Teksta lauks, kurā tiks izvadīts saraksts ar viesiem atrastiem produktiem
-    textbox_found_products = customtkinter.CTkTextbox(master = frame2, width = 350, height = 300)
+    textbox_found_products = customtkinter.CTkTextbox(master = frame2, width = 420, height = 300)
     textbox_found_products.pack(pady=5)
 
     # Lietotājs var izvēlēties produktu no saraksta
@@ -152,14 +189,14 @@ def setting_start():
     final_product_entry.pack(pady = 5)
 
     # Jāievada produkta masa
-    product_mass_entry = customtkinter.CTkEntry(master = frame2, placeholder_text = "Product's mass")
+    product_mass_entry = customtkinter.CTkEntry(master = frame2, placeholder_text = "Product's mass (in gramms)")
     product_mass_entry.pack(pady = 5)
 
     # Jāievada savs vārds un uzvārds
     name_entry = customtkinter.CTkEntry(master = frame2, placeholder_text = "Name Surname")
     name_entry.pack(pady = 5)
 
-    label_end_of_day = customtkinter.CTkLabel(master = frame2, text = "Is this the end of the day?", font = customtkinter.CTkFont(size = 16, weight = "bold"))
+    label_end_of_day = customtkinter.CTkLabel(master = frame2, text = "Will You eat something else today?", font = customtkinter.CTkFont(size = 16, weight = "bold"))
     label_end_of_day.pack(pady = 5)
 
     # Jāatzīmē, vai tā ir dienas beigas (būs vajdzīgs, lai sekotu līdzi excel kolonnam)
@@ -169,10 +206,14 @@ def setting_start():
     meals_3_radio.pack(pady = 5)
     meals_4_radio.pack(pady = 5)
 
-    # Poga, kura saglabās visu excelī (izsauks searching&expanding.py)
-    button_send_data = customtkinter.CTkButton(master = frame2, text = "Send data to plan")
+    # Poga, kura saglabās visu excelī (izsauks expanding.py)
+    button_send_data = customtkinter.CTkButton(master = frame2, text = "Send data to plan", command = lambda:expanding_excel_with_product(name_entry.get(), final_product_entry.get(), product_mass_entry.get(), textbox_found_products.get(1.0, 'end'), end_of_day.get(), progressbar2))
     button_send_data.pack(pady = 10)
 
     root.mainloop()
 
-setting_start()
+def main():
+    setting_start()
+
+if __name__ == "__main__":
+    main()
