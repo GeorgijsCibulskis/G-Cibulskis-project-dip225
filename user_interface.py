@@ -6,7 +6,7 @@ import fitness_plan_creating
 import searching
 import expanding
 
-# Funkcija, kura pābauda visas ievadītas vērtības (pārnests no fitness_plan_creating.py)
+# Funkcija, kura pārbauda visas ievadītas vērtības (pārnests no fitness_plan_creating.py)
 def validate_entries_for_plan_creating(age, weight, goal_weight, height):
     if (age.isnumeric() == False) or int(age) < 0 or int(age) > 110:
         return False
@@ -21,20 +21,23 @@ def validate_entries_for_plan_creating(age, weight, goal_weight, height):
 # Ja viss ir pareizi ievadīts, tad izsaucam failu un izveidojam fitness plānu
 def create_plan_if_valid(age, weight, goal_weight, height, time_span, exercise_mode, meal_count, gender, name, progressbar):
     if validate_entries_for_plan_creating(age, weight, goal_weight, height):
-        # Sākam rādīt progressu lietotājam
+
+        # Sākam rādīt progresu lietotājam
         progressbar.pack(pady = 5, padx = 5)
         progressbar.start()
+
         # Šīs ir vajadzīgs, lai izvairītos no tā, ka, kamēr fails fitness_plan_creating.py ir darbībā, pats user interface paliek 'sasaldēts' un 'Not responding'
         # tāpēc vajag izmantot vēl vienu 'plūsmu' (thread), kurā arī notiks visa cita faila darbība, bet pats UI paliks galvenā plūsmā
         Thread(target = fitness_plan_creating.main, args = (age, weight, goal_weight, height, time_span, exercise_mode, meal_count, gender, name, progressbar)).start()
     else:
+
         # customtkinter nav tādas funkcijas messagebox, tāpēc vajadzēja importēt parasto tkinter
         messagebox.showerror("Error", "Invalid input. Please check your entries.")
 
-# Funkcija, kura meklē ievādīto produktu un izsauc searching.py
+# Funkcija, kura meklē ievadīto produktu un izsauc searching.py
 def searching_product(textbox, product_name, progressbar):
     
-    # Pārbaude vai kaut kas tika ievādīts
+    # Pārbaude vai kaut kas tika ievadīts
     if product_name == '':
         messagebox.showerror("Error", "Please enter a product")
         return
@@ -48,10 +51,10 @@ def searching_product(textbox, product_name, progressbar):
 # Funkcija, kura pārbauda vai tika izvēlēts pareizais produkts un izsauc expanding.py
 def expanding_excel_with_product(name, product, mass, textbox_info, end_of_day, progressbar):
     
-    # Iegustam katru rindu no teksta kastes (no produktiem, kuri tika atrasti) 
+    # Iegustām katru rindu no teksta kastes (no produktiem, kuri tika atrasti) 
     products_in_textbox = textbox_info.split('\n')
 
-    # Dažkārt sarakstā var parādīties 2 tukšie elementi, tāpēc tie arī ir jāizdžēš
+    # Dažkārt sarakstā var parādīties tukšie elementi, tāpēc tie arī ir jāizdzēš
     products_in_textbox = [product for product in products_in_textbox if product != '']
     
     # Tā kā katras rindas sākumā ir "- ", tad tie 2 elementi ir jāizņem ārā no katra elementa sarakstā
@@ -66,6 +69,7 @@ def expanding_excel_with_product(name, product, mass, textbox_info, end_of_day, 
         messagebox.showerror("Error", "No such product in the list")
 
 def setting_start():
+
     # Kā izskatīsies logs
     customtkinter.set_appearance_mode("System")
     customtkinter.set_default_color_theme("dark-blue")
@@ -84,7 +88,7 @@ def setting_start():
     label_title = customtkinter.CTkLabel(master = frame, text = "NutriBoost", font = customtkinter.CTkFont(size = 34, weight = "bold"))
     label_title.pack(expand = True)
 
-    # Fons galvenajām kolonnam
+    # Fons galvenajām kolonnām
     frame_background = customtkinter.CTkFrame(master = root)
     frame_background.pack(side = "top", fill = "both", expand = True, pady = 20, padx = 10)
 
@@ -97,8 +101,9 @@ def setting_start():
     # Dzimuma izvēle
     gender_label = customtkinter.CTkLabel(master = frame1, text = "Gender", font = customtkinter.CTkFont(size = 16, weight = "bold"))
     gender_label.pack()
+
     # Šeit ir nepieciešams izveidot mainīgo gender, jo tas glabās sevī vērtību, kuru izvēlēsies lietotājs, jo tālāk 'radio' pogu argumentos ir 'variable', kas ir mainīgais, kurā tiks
-    # saglābāta pogas 'value', ja uz tas ir uzspiests
+    # saglabātā pogas 'value', ja uz tas ir uzspiests
     gender = customtkinter.StringVar(value = "")
     male_button = customtkinter.CTkRadioButton(master = frame1, text = "Male", variable = gender, value = "Male")
     female_button = customtkinter.CTkRadioButton(master = frame1, text = "Female", variable = gender, value = "Female")
@@ -107,14 +112,15 @@ def setting_start():
 
     # Ievades lauki
     labels_for_entries = ["Name Surname", "Age", "Current weight", "Goal weight", "Height"]
-    # Tā kā ievades lauki ir veidoti ciklā, tad, lai pēc tam no tiem dabūtu ārā vērtību, vajag izveidot sarakstu ar tiem ievades laukiem ,indeksus kuriem var ērti saprast no nosaukumu saraksta rindā augstāk
+
+    # Tā kā ievades lauki ir veidoti ciklā, tad, lai pēc tam no tiem dabūtu ārā vērtību, vajag izveidot sarakstu ar tiem ievades laukiem, indeksus kuriem var ērti saprast no nosaukumu saraksta rindā augstāk
     many_entries = []
     for label_text in labels_for_entries:
         entry = customtkinter.CTkEntry(master = frame1, placeholder_text = label_text)
         entry.pack(pady = 5)
         many_entries.append(entry)
 
-    # Saraksts, uz kuru var uzspiest un izvēlēties atbilsošu variantu
+    # Saraksts, uz kuru var uzspiest un izvēlēties atbilstošu variantu
     time_span_label = customtkinter.CTkLabel(master = frame1, text = "Time Span", font = customtkinter.CTkFont(size = 16, weight = "bold"))
     time_span_label.pack()
 
@@ -147,11 +153,11 @@ def setting_start():
     meals_5_radio.pack(pady = 5)
     meals_6_radio.pack(pady = 5)
 
-    # Poga, lai izveidotu jauno failu un izsaukt failu (fitness_pla_creating.py)
+    # Poga, lai izveidotu jauno failu un izsaukt failu (fitness_plan_creating.py)
     # lambda ir nepieciešama, lai izsauktu funkciju create_plan_if_valid ar atbilstošiem argumentiem, jo citādāk to izdarīt nevar
-    # - ja izsauks bez lambda (command=create_plan_if_valid(/argumenti\)), tad tā funkcija izsauksies uzreiz, kad python emplimentēs šo rindu, bet ievades laukos vēl nekā nebūs => nav piemerots
+    # - ja izsauks bez lambda (command=create_plan_if_valid(/argumenti\)), tad tā funkcija izsauksies uzreiz, kad python implimentēs šo rindu, bet ievades laukos vēl nekā nebūs => nav piemērots
     # - ja izkaukt funkciju bez iekavām kā atsauci uz funkciju (command = create_plan_if_valid), tad tajā nevarēs ierakstīt argumentus
-    # tāpēc ir vajadzīga anonīma funkcija lamba, kuras 'arguments' ir īsta funkcija
+    # tāpēc ir vajadzīga anonīma funkcija lambda, kuras 'arguments' ir īsta funkcija
     button_create_plan = customtkinter.CTkButton(master = frame1, text = "Create Plan", command = lambda:create_plan_if_valid(many_entries[1].get(), many_entries[2].get(), many_entries[3].get(), many_entries[4].get(), time_span.get(), exercise_mode.get(), meals_per_day.get(), gender.get(), many_entries[0].get(), progressbar1))
     button_create_plan.pack(pady = 10)
 
@@ -180,7 +186,7 @@ def setting_start():
     label_found_products = customtkinter.CTkLabel(master = frame2, text = "List of found products", font = customtkinter.CTkFont(size = 16, weight="bold"))
     label_found_products.pack(pady = 5)
 
-    # Teksta lauks, kurā tiks izvadīts saraksts ar viesiem atrastiem produktiem
+    # Teksta lauks, kurā tiks izvadīts saraksts ar visiem atrastiem produktiem
     textbox_found_products = customtkinter.CTkTextbox(master = frame2, width = 420, height = 300)
     textbox_found_products.pack(pady=5)
 
@@ -196,10 +202,10 @@ def setting_start():
     name_entry = customtkinter.CTkEntry(master = frame2, placeholder_text = "Name Surname")
     name_entry.pack(pady = 5)
 
-    label_end_of_day = customtkinter.CTkLabel(master = frame2, text = "Will You eat something else today?", font = customtkinter.CTkFont(size = 16, weight = "bold"))
+    label_end_of_day = customtkinter.CTkLabel(master = frame2, text = "Is this the end of meals for today?", font = customtkinter.CTkFont(size = 16, weight = "bold"))
     label_end_of_day.pack(pady = 5)
 
-    # Jāatzīmē, vai tā ir dienas beigas (būs vajdzīgs, lai sekotu līdzi excel kolonnam)
+    # Jāatzīmē, vai tā ir dienas beigas (būs vajadzīgs, lai sekotu līdzi excel kolonnām)
     end_of_day = customtkinter.StringVar(value = "No")
     meals_3_radio = customtkinter.CTkRadioButton(master = frame2, text = "No", variable = end_of_day, value = "No")
     meals_4_radio = customtkinter.CTkRadioButton(master = frame2, text = "Yes", variable = end_of_day, value = "Yes")
