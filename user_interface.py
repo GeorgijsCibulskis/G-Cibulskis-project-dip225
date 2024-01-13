@@ -195,7 +195,7 @@ def setting_start():
     final_product_entry.pack(pady = 5)
 
     # Jāievada produkta masa
-    product_mass_entry = customtkinter.CTkEntry(master = frame2, placeholder_text = "Product's mass (in gramms)")
+    product_mass_entry = customtkinter.CTkEntry(master = frame2, placeholder_text = "Product's mass (in g)")
     product_mass_entry.pack(pady = 5)
 
     # Jāievada savs vārds un uzvārds

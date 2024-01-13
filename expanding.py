@@ -93,11 +93,10 @@ def appending_nutrition(workbook, sheet, filename, driver, product, mass, end_of
             center_whole_row(sheet, workbook, filename, sheet["F16"].value + i, 1, 8)
     
     # Izvēlētā produkta meklēšana
-    driver.find_element(By.CSS_SELECTOR, "a[onclick='toggleSearchBox();return false;']").click()
-    driver.find_element(By.ID, 'search-box').send_keys(product)
-    driver.find_element(By.ID, 'search-box').send_keys(Keys.ENTER)
+    driver.find_element(By.ID, 'food_query').send_keys(product)
+    driver.find_element(By.CSS_SELECTOR, 'input[type="submit"]').click()
     time.sleep(2)
-
+    
     # Izradījās, ka var gadīties tā, ka, vēlreiz ievadot produkta nosaukumu (jau no piedāvāta saraksta, kurš atrodas teskta kastē) ievades laukā tīmekļa vietnē, tā vietne var atgriezt nevis uzreiz lapu ar barības vielām
     # tam produktam, bet atkal tabulu, kurā būs līdzīgie elementi (šo es uzzināju, kā produktu ievadot 'pork' un tad izvēloties 'Salami, pork, Italian, tad, ja meklēt to pēdējo, vietne atgriež tīmekļa lapu
     # vēl ar 3 produktiem). Šī iemesla dēļ vajag pārbaudīt, vai lapā nav elements ar tāda produkta nosaukumu, ja ir, tad uz to ir jāuzklikšķina
@@ -115,6 +114,7 @@ def appending_nutrition(workbook, sheet, filename, driver, product, mass, end_of
     fat_full_text = driver.find_element(By.XPATH, "//table[@class='center zero']/tbody/tr/td[@class='left'][b[text()='Total\u00a0Fat']]").text
     fat = (fat_full_text.split(" "))[2][:-1]
     fat = float(fat)
+
     carbs_full_text = driver.find_element(By.XPATH, "//table[@class='center zero']/tbody/tr/td[@class='left'][b[text()='Total\u00a0Carbohydrate']]").text
     carbs = (carbs_full_text.split(" "))[2][:-1]
     carbs = float(carbs)

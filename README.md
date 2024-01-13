@@ -1,3 +1,5 @@
+# NutriBoost
+
 **Georgijs Cibuļskis; 231RDB192, 1. kurss, 5. grupa**
 
 **NutriBoost – uzdevums:**
@@ -123,6 +125,9 @@ No šī moduļa tika importētas klases:
 
 &nbsp;&nbsp;&nbsp;&nbsp;Izmantota, lai, kamēr ir atvērts lietotāja interfeiss un notiek plāna izveidošana vai produkta meklēšana, vai produkta barības vielu ierakstīšana failā, pats interfeiss neiesaldētos un būtu funkcionāls. Tas nozīmē, ka katrs fails darbojas savā plūsmā vienlaicīgi un netraucē viens otram, tāpēc nerodas konflikti.
 
+**PAPILDUS INFORMĀCIJA PAR PROGRAMMU**
+
+&nbsp;&nbsp;&nbsp;&nbsp;Izstrādājot šo programmu autors saskarās ar ļoti grūto problēmu - ātrumu, kurš, nemainot pašas programmas kodu, mainījās. Autors mēģināja no tas izvairīties, mainot plūsmju darbību, neizmantojot time.sleep() funkcijas, neizmantotjot tīmekļa darbību fona režīmā, bet tapat ātrums negribēja stabilizēties. Piemēram bija tāds gadījums, kad vakarā excel paplašināšana ar produktu aizņema 30 SEKUNDES VIENAM PRODUKTAM, bet jau nākamajā rītā programma varēja to izdarīt 5-7 sekundēs. Šo iemeslu dēļ autors secina, ka ātruma nestabilitāte ir atkarīga no tīmekļa vietņu (https://www.prokerala.com/health/health-calculators/weight-gain-calculator.php UN https://www.nutritionvalue.org) serveru pieejamību un struktūru. Varbūt uz tiem iz uzlikti algoritmi, kuri neaktivitātes stundās (vakaros un nakti) ierobežo servera resursus, varbūt notiek izmaiņas pašā servera struktūrā no izstrādātāju puses vai kaut kas cits, tāpēc autora programmas ātrums medz atšķirties dažādos laika posmos. (Ja Jums pašlaik programma strādā lēni, tad Jūs varat pārliecināties par to ātrumdarbību video materiālā: )
 
 **Izmantotie avoti:**
 
