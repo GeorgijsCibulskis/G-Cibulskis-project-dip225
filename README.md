@@ -4,7 +4,7 @@
 
 **NutriBoost – uzdevums:**
 
-&nbsp;&nbsp;&nbsp;&nbsp;Palīdzēt automatizēt informācijas apkopošanu par nepieciešamo kaloriju un barības vielu daudzuma uzņemšanu uzturā lai, trenējoties zālē vai nodarbojoties ar kādu sporta veidu, uzņemtu svaru (muskuļus). Arī palīdzēt automatizēt apēstas barības kaloriju un barības vielu daudzumu, apkopojot informāciju tabulās, kur katra tabula ir 1 nedēļas apkopošana.
+&nbsp;&nbsp;&nbsp;&nbsp;Palīdzēt automatizēt informācijas apkopošanu par nepieciešamo kaloriju un barības vielu daudzuma uzņemšanu uzturā lai, trenējoties zālē vai nodarbojoties ar kādu sporta veidu, uzņemtu svaru (muskuļus). Arī palīdzēt automatizēt pierakstīšanu un sekošanu līdzi apēstu kaloriju un barības vielu daudzumam, apkopojot informāciju tabulās, kur katra tabula ir 1 nedēļas apkopošana.
 
 
 **NutriBoost – programmas lietotāji:**
@@ -23,7 +23,7 @@ Programma piedava 2 funkcijas:
 
 * Meklēt atbilstošus produktus (to barības vielas - kalorijas, taukus, ogļhidrātus un olbaltumvielas) un pievienot to plānam pēc lietotāja vārda, uzvārda un apēsta produkta daudzuma. Programmas iekšā arī ir pārdomāta dienu un nedēļu kontrole, lai taisītu jaunas tabulas vai pārietu uz nākamo dienu, kas palīdzēs apkopot informāciju piemērotā cilvēkam veidā.
 
-&nbsp;&nbsp;&nbsp;&nbsp;Programmas ievade notiek izstrādātā lietotāja interfeisā (**TĀPĒC JĀPALAIŽ FAILS user_interface.py!!!** ), tāpēc darbs ar pašu programmu ir ērts un piemērots visiem cilvēkiem, nevis tikai zinošiem, kuri māk strādāt ar programmēšanas izstrādes vidēm un termināliem.
+&nbsp;&nbsp;&nbsp;&nbsp;Programmas ievade notiek izstrādātā lietotāja interfeisā (**TĀPĒC JĀPALAIŽ FAILS user_interface.py caur VSC vai citu programmēšanas rīku!!!** ), tāpēc darbs ar pašu programmu ir ērts un piemērots visiem cilvēkiem, nevis tikai zinošiem, kuri māk strādāt ar programmēšanas izstrādes vidēm un termināliem.
 
 **Izmantotas Python bibliotēkas:**
 
