@@ -135,7 +135,7 @@ def setting_start():
     # Saraksts ar aktivitātes līmeņiem
     exercise_mode_label = customtkinter.CTkLabel(master = frame1, text = "Exercise Level", font = customtkinter.CTkFont(size = 16, weight = "bold"))
     exercise_mode_label.pack()
-    exercise_mode_options = ["Sedentary", "Light", "Moderate", "Very active", "Extreme"]
+    exercise_mode_options = ["Sedentary", "Light", "Moderate", "Very Active", "Extreme"]
     exercise_mode = customtkinter.StringVar(value = "Sedentary")
     exercise_mode_menu = customtkinter.CTkOptionMenu(master = frame1, values = exercise_mode_options, variable = exercise_mode)
     exercise_mode_menu.pack(pady = 5)
